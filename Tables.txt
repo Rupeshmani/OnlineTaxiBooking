@@ -1,0 +1,137 @@
+Create TABLE tblEmployees (
+  EmployeeId int primary key identity,
+  EmployeeName varchar(20) not null ,
+  Designation varchar(25) NOT NULL,
+  PhoneNumber varchar(10) NOT NULL,
+  EmailId varchar(25) NOT NULL,
+  EmpAddress varchar(50) not null,
+  DrivingLicenseNumber varchar(20) NOT NULL,
+ UserId int foreign key references tblUser(userId)
+  )
+
+select * from tblEmployees
+drop table tblEmployees
+
+
+CREATE TABLE tblEmployeeRoster (
+	RosterID int primary key identity,
+	EmployeeID int foreign key references tblEmployees(EmployeeId), 
+	FromDate date not null, 
+	ToDate date not null,
+	InTime datetime not null , 
+	OutTime datetime not null)
+
+select * from tblEmployeeRoster
+drop table tblEmployeeRoster
+
+
+CREATE TABLE tblCustomer
+ (CustomerID int primary key identity,
+ CustomerName varchar(20) not null,
+ PhoneNumber varchar(10) not null,
+ EmailId varchar(25) not null,
+ CustomerAddress varchar(50) not null
+UserId int foreign key references tblUser(userId))
+
+select * from tblCustomer 
+drop table tblCustomer
+
+
+create table tblTaxi (
+	TaxiId int identity primary key,  
+	TaxiModel varchar(20) not null,
+	Color varchar(15), 
+	RegistrationNumber varchar(20) not null, 
+	TaxiType varchar(20) not null)
+
+select * from tblTaxi
+drop table tblTaxi
+
+
+create table tblBooking(
+	BookingID int identity primary key ,
+	CustomerID int foreign key references tblCustomer(CustomerId),
+	TaxiID int foreign key references tblTaxi(TaxiID) not null,
+	BookingDate Date not null,
+	TripDate Date not null,
+	StartTime dateTime not null,
+	EndTime dateTime not null,
+	SourceAddress varchar(30) not null)
+
+select * from tblBooking
+drop table tblBooking
+
+
+Create TABLE tblUser
+(
+    UserId int identity Primary key,
+    Username varchar(20) not null unique,
+    Pass_word varchar(20) not null
+)
+
+
+select * from tblUser
+drop table tblUser
+
+
+Create TABLE tblRole
+(
+    RoleId int identity primary key,
+    RoleName varchar(20)
+)
+insert into tblRole values('Admin')
+insert into tblRole values('Employee')
+insert into tblRole values('Customer')
+
+select * from tblRole
+
+
+CREATE TABLE tblUserRole
+(
+    UserId int foreign key references tblUser(UserId),
+    RoleId int foreign key references tblRole(RoleId)
+)
+
+select * from tblUserRole
+drop table tblUserRole
+
+
+
+CREATE TABLE tblSchedule
+(
+	EmpId int foreign key references tblEmployees(EmployeeId) not null,
+	BookingId int foreign key references tblBooking(BookingID) not null,
+	Tripdate date not null,
+	StartTime datetime not null,
+	EndTime datetime not null,
+	Slot int not null,
+	RideStatus varchar(20) not null default 'Pending' 
+)
+
+select * from tblSchedule
+drop table tblSchedule
+
+
+Create TABLE tblLocations
+(
+	AllLocations varchar(20) primary key,
+)
+select * from tblLocations
+
+
+Create table tblFeedback
+(
+    DriverName varchar(30) not null,
+    Punctual varchar(20) not null,
+    Driver varchar(20) not null,
+    Hygiene varchar(20) not null,
+    SafetyComfort varchar(20) not null,
+    Experience varchar(20) not null
+)
+
+select * from tblFeedback
+
+
+
+
+

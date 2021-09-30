@@ -1,0 +1,451 @@
+create database CabGoDB
+
+Create TABLE tblEmployees (
+  EmployeeId int primary key identity,
+  EmployeeName varchar(20) not null ,
+  Designation varchar(25) NOT NULL,
+  PhoneNumber varchar(10) NOT NULL,
+  EmailId varchar(25) NOT NULL,
+  EmpAddress varchar(50) not null,
+  DrivingLicenseNumber varchar(20) NOT NULL,
+  )
+  
+alter table tblEmployees add UserId int foreign key references tblUser(userId)
+
+insert into tblEmployees values()
+  select * from tblEmployees
+  delete from tblEmployees
+
+create procedure usp_CreateEmployee
+@empName varchar(20), @desg varchar(25) ,@PhNo varchar(10), @Email varchar(25), @Address varchar(50), @DrLNo varchar(20), 
+    @username VARCHAR(20), @password VARCHAR(20),
+--output parameter
+	@empid int output
+AS
+begin
+	INSERT INTO tblUser VALUES(@username, @password)
+	insert into tblUserRole values(@@IDENTITY, 2)
+	declare @k int
+	select @k = UserId from tblUser where Username = @username 
+	insert into tblEmployees values (@empName, @desg, @PhNo, @Email, @Address, @DrLNo,@k)
+	set @empid = @@IDENTITY
+end
+
+drop procedure usp_CreateEmployee
+create procedure usp_CreateAdmin
+@empName varchar(20), @desg varchar(25) ,@PhNo varchar(10), @Email varchar(25), @Address varchar(50), @DrLNo varchar(20), 
+    @username VARCHAR(20), @password VARCHAR(20),
+--output parameter
+	@empid int output
+AS
+begin
+	insert into tblEmployees values (@empName, @desg, @PhNo, @Email, @Address, @DrLNo)
+	set @empid = @@IDENTITY
+	INSERT INTO tblUser VALUES(@username, @password)
+    
+	insert into tblUserRole values(@@IDENTITY, 1)
+end
+
+declare @i int
+exec usp_CreateAdmin 'Rupesh', 'Admin', '9784639862', 'Admin@CabGo.com', 'Vijayawada', 'DL02051999', 'Rupesh@admin', 'Admin@123', @i output
+
+drop proc usp_CreateEmployee
+
+declare @eid int
+exec usp_CreateEmployee 'Himanshu','Driver','9856853423','Himanshu@CabGo.com','Pune','DL18111978','Himanshu','Password@123',@eid output
+
+declare @eid int
+exec usp_CreateEmployee 'Rajendar','Driver','9856889774','Rajendar@CabGo.com','Thane','DL18061988','Rajendar','Password@123',@eid output
+
+declare @eid int
+exec usp_CreateEmployee 'Manish','Driver','9839856654','Manish@CabGo.com','Mumbai','DL20071989','Manish','Password@123',@eid output
+
+declare @eid int
+exec usp_CreateEmployee 'Suresh','Driver','9856872423','Suresh@CabGo.com','Bandra','DL18111979','Suresh','Password@123',@eid output
+
+declare @i int
+exec usp_CreateAdmin 'Mahesh', 'Driver', '9884839962', 'Mahesh@CabGo.com', 'Nasik', 'DL02061999', 'Mahesh', 'Password@123', @i output
+
+declare @eid int
+exec usp_CreateEmployee 'Vital','Driver','9856872876','Vital@CabGo.com','Borivali','DL18081985','Vital','Password@123',@eid output
+
+declare @eid int
+exec usp_CreateEmployee 'Jitendra','Driver','9853452423','Jitendra@CabGo.com','Santacruz','DL15071979','Jitendra','Password@123',@eid output
+
+declare @eid int
+exec usp_CreateEmployee 'Sunil','Driver','9453872423','Sunil@CabGo.com','Andheri','DL22051979','Sunil','Password@123',@eid output
+
+declare @i int
+exec usp_CreateAdmin 'Rajesh', 'Driver','9234439568', 'Rajesh@CabGo.com', 'Juhu', 'DL02072000', 'Rajesh', 'Password@123', @i output
+
+declare @i int
+exec usp_CreateAdmin 'Rehman', 'Driver','9735439568', 'Rehman@CabGo.com', 'Bandra', 'DL05071992', 'Rehman', 'Password@123', @i output
+
+CREATE proc usp_GetAllEmployees
+as
+select  EmployeeId,  EmployeeName, Designation , PhoneNumber,
+       EmailId, EmpAddress , DrivingLicenseNumber
+      from tblEmployees  
+
+exec usp_GetAllEmployees
+
+CREATE TABLE tblEmployeeRoster (
+	RosterID int primary key identity,
+	EmployeeID int foreign key references tblEmployees(EmployeeId), 
+	FromDate date not null, 
+	ToDate date not null,
+	InTime datetime not null , 
+	OutTime datetime not null)
+
+	drop table tblEmployeeRoster
+
+Create procedure usp_CreateNewEmployeeRoster
+@EmpID int, @FromDate date, @ToDate date,
+@InTime time, @OutTime time,
+@RosterID int output ----output parameters
+As
+Begin
+	Insert into tblEmployeeRoster values(@EmpID, @FromDate, @Todate, @InTime, @OutTime)
+	Set @RosterId = @@IDENTITY
+End
+
+create procedure usp_GetWeeklyRosters
+as
+begin
+	select RosterID, EmployeeID, FromDate, ToDate, InTime, OutTime 
+	from tblEmployeeRoster where FromDate >= DATEADD(day,-7,getdate())
+end
+
+create proc usp_GetRosterByEmpId
+@empId int
+as
+begin
+if exists(select * from tblEmployees where EmployeeId = @empId)
+	select RosterId,EmployeeId, FromDate, ToDate, InTime, OutTime from tblEmployeeRoster where EmployeeID = @empId
+end
+
+CREATE TABLE tblCustomer
+ (CustomerID int primary key identity,
+ CustomerName varchar(20) not null,
+ PhoneNumber varchar(10) not null,
+ EmailId varchar(25) not null,
+ CustomerAddress varchar(50) not null)
+
+alter table tblCustomer add UserId int foreign key references tblUser(userId)
+
+select * from tblCustomer 
+delete from tblCustomer
+create procedure usp_GetAllCustomer
+as
+select CustomerId, CustomerName, PhoneNumber, EmailId, CustomerAddress from tblCustomer
+
+exec usp_GetAllCustomer
+
+create procedure usp_CreateNewCustomer
+--input parameters
+	@CustName varchar(20), @PhNo varchar(10), @Email varchar(25), @Address varchar(50), 
+    @username VARCHAR(20), @password VARCHAR(20),
+--output parameter
+	 @Custid int output
+AS
+begin
+	INSERT INTO tblUser VALUES(@username, @password)
+	insert into tblUserRole values(@@IDENTITY, 3)
+	declare @j int
+	select @j= UserId from tblUser where Username = @username
+	insert into tblCustomer values (@CustName, @PhNo, @Email, @Address, @j)
+	set @Custid = @@IDENTITY
+end
+
+declare @cid int
+exec usp_CreateNewCustomer 'Sahil','876665798','abc@xyz.com','gfdxcvghbjn','Sa','jain', @cid output
+
+drop procedure usp_CreateNewCustomer
+
+
+create table tblTaxi (
+	TaxiId int identity primary key,  
+	TaxiModel varchar(20) not null,
+	Color varchar(15), 
+	RegistrationNumber varchar(20) not null, 
+	TaxiType varchar(20) not null)
+
+	select distinct TaxiType from tblTaxi
+select * from tblTaxi
+create procedure usp_CreateTaxi
+@TaxiModel varchar(20), @color varchar(15), @RegNo varchar(20), @Taxitype varchar(20), @TaxiId int output
+as
+begin
+	insert into tblTaxi values (@TaxiModel, @color, @RegNo, @Taxitype)
+	set @TaxiId =@@IDENTITY
+end
+
+create proc usp_GetTaxiType
+as
+begin
+	select distinct TaxiType from tblTaxi
+end
+
+insert into tblTaxi values ('Toyota Innova', 'White','MH01SD2123','SUV')
+insert into tblTaxi values ('Maruti Dzire', 'Silver','MH01ZK2224','Sedan')
+insert into tblTaxi values ('Force Traveller', 'White','MH01GH6787','MiniBus')
+insert into tblTaxi values ('Honda Amaze', 'Black','MH01HK5445','Sedan')
+insert into tblTaxi values ('Hyundai i20', 'Silver','MH01ZH3789','Hatchback')
+insert into tblTaxi values ('Hyundai Aura', 'Brown','MH01VH5987','Sedan')
+insert into tblTaxi values ('Tata Zest', 'White','MH01HG5344','Sedan')
+insert into tblTaxi values ('Toyota Hiace', 'Silver','MH01TY6743','MiniBus')
+insert into tblTaxi values ('Mahindra Supro', 'Silver','MH01DS3289','MiniBus')
+insert into tblTaxi values ('Tata Altroz', 'Golden','MH01ZH6538','Hatchback')
+
+select * from tblTaxi
+
+alter table tblTaxi add EmployeeId  int foreign key references tblEmployees(EmployeeId)
+
+create procedure usp_GetTaxiById
+@TaxiId int
+as
+begin try
+	if exists(select * from tblTaxi where taxiId = @TaxiId)
+		select * from tblTaxi where TaxiId = @TaxiId
+	else
+		throw 50004,'Taxi not found',1
+end try
+begin catch
+	throw
+end catch
+
+create table tblBooking(
+	BookingID int identity primary key ,
+	CustomerID int foreign key references tblCustomer(CustomerId),
+	TaxiID int foreign key references tblTaxi(TaxiID) not null,
+	BookingDate Date not null,
+	TripDate Date not null,
+	StartTime dateTime not null,
+	EndTime dateTime not null,
+	SourceAddress varchar(30) not null)
+
+	select * from tblBooking
+drop table tblBooking
+insert into tblBooking values (1,2,'05-May-2021','05-May-2021','01:25:30','02:25:30','Andheri')
+
+	select * from tblBooking
+alter table tblBooking drop column DestinationAddress
+
+create Procedure usp_CreateBooking
+@CustId int, @EmpId int, @BookingDt Date, @TrDate date, @StTime time, @EndTime time, @SrcAddress varchar(30), @BookingId int output 
+as
+if exists(select * from tblCustomer where UserId = @CustId)
+begin
+	declare @TaxiId int
+	declare @i int
+	select @i = CustomerID from tblCustomer where UserId = @CustId
+	select @TaxiId = TaxiId from tblTaxi where EmployeeId = @EmpId
+	insert into tblBooking values(@i, @TaxiId, @BookingDt, @TrDate, @StTime, @EndTime, @SrcAddress)
+	set @BookingId = @@IDENTITY
+end
+else
+	set @BookingId=-1
+
+declare @i int
+exec usp_CreateBooking 1,3,'05-May-2021','05-May-2021','01:25:30','02:25:30','Andheri', @i output
+print @i
+
+drop procedure usp_CreateBooking
+
+Create TABLE tblUser
+(
+    UserId int identity Primary key,
+    Username varchar(20) not null unique,
+    Pass_word varchar(20) not null
+)
+
+
+select * from tblUser
+delete from tblUser where UserId = 3
+delete from tblCustomer
+DBCC CHECKIDENT ('tblCustomer', RESEED, 0)
+--CREATE PROC usp_CreateNewUser
+--    @userid INT OUTPUT,
+--    @username VARCHAR(20), @password VARCHAR(20)
+--AS
+--BEGIN
+--    INSERT INTO tblUser VALUES(@username, @password)
+--    SET @userid = @@IDENTITY
+--END
+
+
+Create TABLE tblRole
+(
+    RoleId int identity primary key,
+    RoleName varchar(20)
+)
+insert into tblRole values('Admin')
+insert into tblRole values('Employee')
+insert into tblRole values('Customer')
+
+CREATE TABLE tblUserRole
+(
+    UserId int foreign key references tblUser(UserId),
+    RoleId int foreign key references tblRole(RoleId)
+)
+
+drop table tblUser
+
+CREATE TABLE tblSchedule
+(
+	EmpId int foreign key references tblEmployees(EmployeeId) not null,
+	BookingId int foreign key references tblBooking(BookingID) not null,
+	Tripdate date not null,
+	StartTime datetime not null,
+	EndTime datetime not null,
+	Slot int not null,
+	RideStatus varchar(20) not null default 'Pending' 
+)
+
+create proc usp_CreateSchedule
+@empId int, @bookingId int, @tripdt date, @startTm datetime, @endTm datetime, @slot int
+as
+begin
+	insert into tblSchedule values (@empId, @bookingId, @tripdt, @startTm, @endTm, @slot, 'Pending')
+end
+
+select * from tblSchedule
+
+drop table tblSchedule
+delete from tblSchedule
+insert into tblSchedule values (5,1,'04-Mar-2015','01:25:30','02:25:30',1, 'Pending')
+
+create proc usp_GetMonthlyLogs
+as
+begin
+	select EmpId as EmployeeId, BookingId, Tripdate, StartTime, EndTime, Slot from tblSchedule 
+	where RideStatus='Completed' and Tripdate >= DATEADD(day,-30,getdate())
+end
+
+
+create procedure usp_GetBookingsByEmpId
+@userid int
+as
+begin
+	select b.bookingid BookingId, b.BookingDate BookingDate, b.TripDate TripDate, Convert(varchar, b.starttime, 108) StartTime, b.SourceAddress SourceAddress, s.Slot RideSlot, s.RideStatus RideStatus
+	from tblBooking b join tblSchedule s on b.BookingID = s.BookingId where b.TaxiID = 
+	(select TaxiId from tbltaxi where employeeId = (select EmployeeId from tblEmployees where UserId = @userid))
+end
+
+exec usp_GetBookingsByEmpId 4
+
+create procedure usp_GetAvailableEmployee
+@taxiType varchar(20), @startTime datetime, @endTime datetime,
+@emp int output
+as 
+if exists(select EmployeeId from tblTaxi where TaxiType = @taxiType)
+begin
+	if exists(select EmployeeId from tblTaxi where TaxiType = @taxiType and EmployeeId not in (select EmpId from tblSchedule))
+	begin
+		select top 1 @emp = EmployeeId from tblTaxi where TaxiType = @taxiType and EmployeeId not in (select EmpId from tblSchedule)
+	end
+	else
+	begin
+		Select top 1 @emp = EmpId from tblSchedule where (((@startTime not between StartTime and EndTime) and (@endTime not between StartTime and EndTime) and Tripdate = GETDATE()) or 
+										(((@startTime between StartTime and EndTime) or (@endTime between StartTime and EndTime)) and RideStatus = 'Completed' and Tripdate = GETDATE()))
+										and EmpId in (select EmployeeId from tblTaxi where TaxiType = @taxiType)
+	end
+end
+else
+	set @emp = -1
+
+
+	select * from tblSchedule
+
+drop procedure usp_GetAvailableEmployee
+
+create procedure usp_CompleteRide
+@userid int, @bookingid int
+as
+begin
+	update tblSchedule set ridestatus = 'Completed' where BookingId = @bookingid and 
+	empid = (select EmployeeId from tblEmployees where UserId = @userid)
+end
+
+
+drop proc usp_CompleteRide
+
+
+declare @k int
+exec usp_GetFreeTaxi 'Sedan', @k output
+print (@k)
+
+Create TABLE tblLocations
+(
+	AllLocations varchar(20) primary key,
+)
+
+
+
+create procedure usp_ValidateUser
+@Username varchar(20), @password varchar(20), @RoleId int output
+as
+if exists(select * from tblUser where Username = @Username and Pass_word = @password)
+begin
+	declare @rid int
+	select @rid = RoleId from tblUserRole where UserId = (select UserId from tblUser where Username = @Username and Pass_word = @password)
+
+	set @RoleId = @rid
+end
+	else
+	set @RoleId = -1	
+
+create procedure usp_getUserId
+@Username varchar(20), @password varchar(20), @UserId int output
+as
+if exists(select * from tblUser where Username = @Username and Pass_word = @password)
+begin	
+	select @UserId = UserId from tblUser where Username = @Username and Pass_word = @password
+end
+else
+	set @UserId = -1
+
+
+drop proc usp_getUserId
+
+Create table tblFeedback
+(
+    DriverName varchar(30) not null,
+    Punctual varchar(20) not null,
+    Driver varchar(20) not null,
+    Hygiene varchar(20) not null,
+    SafetyComfort varchar(20) not null,
+    Experience varchar(20) not null
+)
+
+select * from tblTaxi
+
+select * from tblLocations
+
+create proc usp_GetLocations
+as
+begin
+	select AllLocations from tblLocations
+
+
+
+
+
+
+
+
+
+
+--create procedure usp_DeleteTaxiById
+--@TaxiId int
+--as
+--begin try
+--	if exists(select * from tblTaxi where taxiId = @TaxiId)
+--		delete from tblTaxi where TaxiId = @TaxiId
+--	else
+--		throw 50004,'Taxi not found',1
+--end try
+--begin catch
+--	throw
+--end catch
+
